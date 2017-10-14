@@ -31,6 +31,16 @@ let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTok
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
 let etherTokenAddress = zeroEx.exchange.getContractAddressAsync();
 
+// Populate Orders on Server Start
+fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data) {
+    if (err) {
+        console.log("ORDER DATA NOT OBTAINED!!")
+        throw err;
+    }
+    orders.push(JSON.parse(data));
+    console.log(JSON.parse(data));
+});
+
 setTimeout(function(){
     var contractCreateEvent = tokenFactory.ContractCreated({_from:web3.eth.coinbase},{fromBlock: 0, toBlock: 'latest'});
     contractCreateEvent.watch(async function(err, result) {
@@ -131,7 +141,7 @@ async function fillOrder(req, res) {
 }
 
 async function exchange(req, res) {
-    res.send();
+    res.send(orders);
 }
 
 app.listen(app.get("port"), function () {
