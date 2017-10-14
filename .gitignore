@@ -1,2 +1,5 @@
 # Ignore the contract builds
 /build/
+
+# Ignore node_modules
+/node_modules/
