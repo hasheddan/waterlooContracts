@@ -1,0 +1,26 @@
+{
+  "name": "waterloocontracts",
+  "version": "1.0.0",
+  "description": "contracts for ETHWaterloo hackathon",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HashedDan/waterlooContracts.git"
+  },
+  "author": "Daniel Mangum",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HashedDan/waterlooContracts/issues"
+  },
+  "homepage": "https://github.com/HashedDan/waterlooContracts#readme",
+  "dependencies": {
+    "0x.js": "^0.21.4"
+  }
+}

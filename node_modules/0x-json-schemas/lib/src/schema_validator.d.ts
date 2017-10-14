@@ -1,0 +1,8 @@
+import { ValidatorResult, Schema } from 'jsonschema';
+export declare class SchemaValidator {
+    private validator;
+    constructor();
+    addSchema(schema: Schema): void;
+    validate(instance: any, schema: Schema): ValidatorResult;
+    isValid(instance: any, schema: Schema): boolean;
+}
