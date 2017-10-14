@@ -18,10 +18,24 @@ app.get('/fillOrder', fillOrder);
 
 let hash;
 
-let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at("0x8ea76477cfaca8f7ea06477fd3c09a740ac6012a");
+let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at("0x2ebb94cc79d7d0f1195300aaf191d118f53292a8");
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
 let etherTokenAddress = zeroEx.exchange.getContractAddressAsync();
+
+setTimeout(function(){
+    console.log("_______________________");
+    var contractCreateEvent = tokenFactory.ContractCreated({_from:web3.eth.coinbase},{fromBlock: 0, toBlock: 'latest'});
+    contractCreateEvent.watch(function(err, result) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.log("here");
+      console.log(result);
+    });
+},5000);
+
 
 async function getAccounts(req, res) {
     zeroEx.getAvailableAddressesAsync()
