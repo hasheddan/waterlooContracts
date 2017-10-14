@@ -8,7 +8,7 @@ contract HumanStandardTokenFactory {
     mapping(address => bool) public isHumanToken; //verify without having to do a bytecode check.
     bytes public humanStandardByteCode;
     
-    event ContractCreated(address indexed owner, address indexed contractAddress, uint dateCreated);
+    event ContractCreated(address indexed owner, address indexed contractAddress, string _name, string _symbol, uint dateCreated);
 
     function HumanStandardTokenFactory() {
       //upon creation of the factory, deploy a HumanStandardToken (parameters are meaningless) and store the bytecode provably.
@@ -57,7 +57,7 @@ contract HumanStandardTokenFactory {
         HumanStandardToken newToken = (new HumanStandardToken(_initialAmount, _name, _symbol, _expirationDays));
         created[msg.sender].push(address(newToken));
         isHumanToken[address(newToken)] = true;
-        ContractCreated(msg.sender, newToken, now);
+        ContractCreated(msg.sender, newToken, _name, _symbol, now);
         newToken.transfer(msg.sender, _initialAmount); //the factory will own the created tokens. You must transfer them.
         return address(newToken);
     }
