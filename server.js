@@ -14,7 +14,6 @@ app.set("port", process.env.PORT || 8000);
 app.post('/create', createContract);
 app.get('/accounts', getAccounts)
 app.get('/submitTransaction', submitTransaction);
-
 app.get('/fillOrder', fillOrder);
 
 let hash;
@@ -22,6 +21,7 @@ let hash;
 let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at("0x8ea76477cfaca8f7ea06477fd3c09a740ac6012a");
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
+let etherTokenAddress = zeroEx.exchange.getContractAddressAsync();
 
 async function getAccounts(req, res) {
     zeroEx.getAvailableAddressesAsync()
@@ -40,6 +40,8 @@ async function createContract(req, res) {
     res.send(tx);
 };
 
+async function getBalance() {
+}
 async function submitTransaction(req, res) {
     await zeroEx.setProviderAsync(provider);
     let date = new Date();
@@ -60,21 +62,26 @@ async function submitTransaction(req, res) {
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
         hash = ZeroEx.getOrderHashHex(form);
-        res.send(success);
     } catch (error) {
         console.log(error);
         res.send({ error: error.toString() })
     }
-    res.send({ "fd": "ds" })
+    res.send(hash);
 }
 
 async function fillOrder(req, res) {
-    let form = {};
-    console.log(hash);
-    let success = await zeroEx.signOrderHashAsync(hash, web3.eth.accounts[0])
-    // form.ecSignature = success;
-    console.log(form);
-    res.send(success);
+    let form = req.body.form;
+    let success = await zeroEx.signOrderHashAsync(req.hash, web3.eth.accounts[0])
+    form.ecSignature = success;
+    let number = new BigNumber(req.body.number);
+    let tx = {};
+    try {
+        tx = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, web3.eth.accounts[0])
+        tx = await zeroEx.exchange.fillOrderAsync(form, number, true, web3.eth.accounts[1]);  
+    } catch(e) {
+        console.log(e);
+    }
+    res.send(tx);
 }
 
 
