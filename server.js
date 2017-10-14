@@ -122,6 +122,25 @@ async function createOrder(req, res) {
 }
 
 async function getBalance(req, res) {
+    // TODO: Need to parse by address passed
+    var stuff = [];
+    fs.readdir('./data/tokens/', function(err, filenames) {
+        if (err) {
+          onError(err);
+          return;
+        }
+        filenames.forEach(function(filename) {
+          fs.readFile('./data/tokens/' + filename, 'utf-8', function(err, content) {
+            if (err) {
+              onError(err);
+              return;
+            }
+            stuff.push(JSON.parse(content));
+            console.log(stuff);
+          });
+        });
+    });
+    res.send(stuff);
 }
 
 
