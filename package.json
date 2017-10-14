@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently --kill-others \"npm run testrpc\" \"npm run server\"",
+    "dev": "concurrently --kill-others \"npm run testrpc\" \"nodemon server.js\"",
     "server": "node server.js",
     "testrpc": "testrpc --networkId 50 -p 8545 --db ./0x_testrpc_snapshot -m \"concert load couple harbor equip island argue ramp clarify fence smart topic\""
   },
