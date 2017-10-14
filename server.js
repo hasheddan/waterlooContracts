@@ -48,7 +48,7 @@ async function runThoughEverything(req, res) {
             "takerTokenAddress": await zeroEx.exchange.getZRXTokenAddressAsync(),
             "makerTokenAddress": await zeroEx.exchange.getZRXTokenAddressAsync(),
             "makerTokenAmount": new BigNumber("2"),
-            "takerTok+enAmount": new BigNumber("2"),
+            "takerTokenAmount": new BigNumber("2"),
             "takerFee": new BigNumber("0"),
             "makerFee": new BigNumber("0"),
             "exchangeContractAddress": availableAddresses,
