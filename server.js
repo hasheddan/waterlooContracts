@@ -6,33 +6,44 @@ var web3 = new Web3(provider);
 var zeroEx = new ZeroEx(provider);
 var express = require('express');
 var app = express();
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var fs = require('fs');
 
 app.use(bodyParser());
+
+let addresses = [];
 
 app.set("port", process.env.PORT || 8000);
 app.post('/create', createContract);
 app.get('/accounts', getAccounts)
 app.get('/submitTransaction', submitTransaction);
 app.get('/fillOrder', fillOrder);
+app.get('/exchange', exchange);
 
 let hash;
-
-let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at("0x2ebb94cc79d7d0f1195300aaf191d118f53292a8");
+let tokenFactoryAddress = "0x99356167edba8fbdc36959e3f5d0c43d1ba9c6db";
+let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at(tokenFactoryAddress);
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
 let etherTokenAddress = zeroEx.exchange.getContractAddressAsync();
 
 setTimeout(function(){
-    console.log("_______________________");
     var contractCreateEvent = tokenFactory.ContractCreated({_from:web3.eth.coinbase},{fromBlock: 0, toBlock: 'latest'});
     contractCreateEvent.watch(function(err, result) {
-      if (err) {
-        console.log(err);
+      if (!err) {
+        let token = { 
+              owner: result.args.owner,
+              contractAddress: result.args.contractAddress,
+              name : result.args._name,
+              symbol: result.args._symbol,
+              dateCreated: result.args.dateCreated.toString() 
+        }
+        addresses.push(token);
+        fs.writeFile('./data/tokens.json', JSON.stringify(addresses), (err , res) => {
+            console.log(err);
+        })
         return;
       }
-      console.log("here");
-      console.log(result);
     });
 },5000);
 
@@ -51,11 +62,9 @@ async function createContract(req, res) {
     tokenFactory.createHumanStandardToken(req.body.initialAmount, req.body.name, req.body.symbol, req.body.expirationDate, {from: req.account || web3.eth.accounts[0], gas: 819686}, (err, res) => {
         console.log(err, res);
     });
-    res.send(tx);
+    res.send({'success': true});
 };
 
-async function getBalance() {
-}
 async function submitTransaction(req, res) {
     await zeroEx.setProviderAsync(provider);
     let date = new Date();
@@ -98,6 +107,9 @@ async function fillOrder(req, res) {
     res.send(tx);
 }
 
+async function exchange(req, res) {
+    res.send();
+}
 
 app.listen(app.get("port"), function () {
     console.log('Server running on http://localhost:' + app.get("port"))
