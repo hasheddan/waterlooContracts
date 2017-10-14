@@ -25,3 +25,9 @@ app.get('/test', function(req, res) {
 app.listen(app.get("port"), function () {
   console.log('Server running on http://localhost:' + app.get("port"))
 })
+
+// TODO
+/*
+	Make npm start run the 0x testrpc commands as well
+
+*/
