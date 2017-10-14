@@ -12,6 +12,7 @@ import "./Token.sol";
 
 contract StandardToken is Token {
 
+
     uint256 constant MAX_UINT256 = 2**256 - 1;
 
     function transfer(address _to, uint256 _value) returns (bool success) {
