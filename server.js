@@ -5,17 +5,24 @@ var provider = new Web3.providers.HttpProvider('http://localhost:8545');
 var web3 = new Web3(provider);
 var zeroEx = new ZeroEx(provider);
 var express = require('express');
-var app = express()
+var app = express();
+var bodyParser = require('body-parser')
+
+app.use(bodyParser());
 
 app.set("port", process.env.PORT || 8000);
-app.post("/create", createContract);
+app.post('/create', createContract);
 app.get('/accounts', getAccounts)
 app.get('/submitTransaction', submitTransaction);
+
 app.get('/fillOrder', fillOrder);
 
 let hash;
 
-let tokenFactory = web3.eth.contract(require('../build/'))
+let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at("0x8ea76477cfaca8f7ea06477fd3c09a740ac6012a");
+
+let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
+
 async function getAccounts(req, res) {
     zeroEx.getAvailableAddressesAsync()
         .then(function (availableAddresses) {
@@ -27,7 +34,10 @@ async function getAccounts(req, res) {
 }
 
 async function createContract(req, res) {
-
+    tokenFactory.createHumanStandardToken(req.body.initialAmount, req.body.name, req.body.symbol, req.body.expirationDate, {from: req.account || web3.eth.accounts[0], gas: 819686}, (err, res) => {
+        console.log(err, res);
+    });
+    res.send(tx);
 };
 
 async function submitTransaction(req, res) {
