@@ -19,6 +19,7 @@ app.get('/accounts', getAccounts)
 app.get('/submitTransaction', submitTransaction);
 app.get('/fillOrder', fillOrder);
 app.get('/exchange', exchange);
+app.get('/getBalance', getBalance);
 
 let hash;
 let tokenFactoryAddress = "0x99356167edba8fbdc36959e3f5d0c43d1ba9c6db";
@@ -38,8 +39,10 @@ setTimeout(function(){
               symbol: result.args._symbol,
               dateCreated: result.args.dateCreated.toString() 
         }
+        let balance = zeroEx.token.getBalanceAsync(result.args.contractAddress, result.args.owner)
+        await zeroEx.token.setProxyAllowanceAsync(result.args.contractAddress, result.args.owner, balance );
         addresses.push(token);
-        fs.writeFile('./data/tokens.json', JSON.stringify(addresses), (err , res) => {
+        fs.writeFile(`./data/tokens/${tokenFactoryAddress}.json`, JSON.stringify(addresses), (err , res) => {
             console.log(err);
         })
         return;
@@ -92,6 +95,10 @@ async function submitTransaction(req, res) {
     res.send(hash);
 }
 
+async function getBalance(req, res) {
+}
+
+
 async function fillOrder(req, res) {
     let form = req.body.form;
     let success = await zeroEx.signOrderHashAsync(req.hash, web3.eth.accounts[0])
@@ -101,6 +108,7 @@ async function fillOrder(req, res) {
     try {
         tx = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, web3.eth.accounts[0])
         tx = await zeroEx.exchange.fillOrderAsync(form, number, true, web3.eth.accounts[1]);  
+        fs.writeFile(`./data/orders/${tokenFactoryAddress}.json`, orders);
     } catch(e) {
         console.log(e);
     }
