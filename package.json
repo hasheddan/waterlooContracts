@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "concurrently --kill-others \"npm run server\" \"npm run testrpc\"",
+    "server": "node server.js",
     "testrpc": "testrpc --networkId 50 -p 8545 --db ./0x_testrpc_snapshot -m \"concert load couple harbor equip island argue ramp clarify fence smart topic\""
   },
   "repository": {
@@ -25,5 +26,8 @@
     "0x.js": "^0.21.4",
     "bignumber.js": "^4.1.0",
     "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.0"
   }
 }
