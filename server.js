@@ -8,8 +8,8 @@ var express = require('express');
 var app = express()
 
 app.set("port", process.env.PORT || 8000);
-
-app.get('/test', function(req, res) {
+app.post("/")
+app.get('/accounts', function(req, res) {
   zeroEx.getAvailableAddressesAsync()
     .then(function(availableAddresses) {
         console.log(availableAddresses);
@@ -25,6 +25,17 @@ app.get('/submitTransaction', submitTransaction);
 app.get('/fillOrder', fillOrder);
 
 let hash;
+
+async function addresses(req, res) {
+    zeroEx.getAvailableAddressesAsync()
+        .then(function(availableAddresses) {
+            console.log(availableAddresses);
+            res.send(JSON.stringify(availableAddresses));
+        })
+        .catch(function(error) {
+            console.log('Caught error: ', error);
+        });
+}
 
 async function submitTransaction(req, res) {
     await zeroEx.setProviderAsync(provider);
@@ -104,4 +115,4 @@ async function submitTransaction(req, res) {
 
 app.listen(app.get("port"), function () {
     console.log('Server running on http://localhost:' + app.get("port"))
-  })
+})
