@@ -51,12 +51,12 @@ contract HumanStandardToken is StandardToken {
     }
 
     function transfer(address _to, uint256 _value) isAlive returns (bool success) {
-        super.transfer(address _to, uint256 _value);
+        super.transfer(_to, _value);
         return true;
     }
 
     function transferFrom(address _from, address _to, uint256 _value) isAlive returns (bool success) {
-        super.transferFrom(address _from, address _to, uint256 _value);
+        super.transferFrom(_from, _to, _value);
         return true;
     }
 

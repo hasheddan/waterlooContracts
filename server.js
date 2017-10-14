@@ -8,40 +8,33 @@ var express = require('express');
 var app = express()
 
 app.set("port", process.env.PORT || 8000);
-app.post("/")
-app.get('/accounts', function(req, res) {
-  zeroEx.getAvailableAddressesAsync()
-    .then(function(availableAddresses) {
-        console.log(availableAddresses);
-        res.send(JSON.stringify(availableAddresses));
-    })
-    .catch(function(error) {
-        console.log('Caught error: ', error);
-    });
-});
-
-
+app.post("/create", createContract);
+app.get('/accounts', getAccounts)
 app.get('/submitTransaction', submitTransaction);
 app.get('/fillOrder', fillOrder);
 
 let hash;
 
-async function addresses(req, res) {
+let tokenFactory = web3.eth.contract(require('../build/'))
+async function getAccounts(req, res) {
     zeroEx.getAvailableAddressesAsync()
-        .then(function(availableAddresses) {
-            console.log(availableAddresses);
+        .then(function (availableAddresses) {
             res.send(JSON.stringify(availableAddresses));
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.log('Caught error: ', error);
         });
 }
+
+async function createContract(req, res) {
+
+};
 
 async function submitTransaction(req, res) {
     await zeroEx.setProviderAsync(provider);
     let date = new Date();
     try {
-        var zrxContract = await zeroEx.exchange.getContractAddressAsync(); 
+        var zrxContract = await zeroEx.exchange.getContractAddressAsync();
         let form = {
             "maker": web3.eth.accounts[0],
             "taker": web3.eth.accounts[1],
@@ -51,20 +44,20 @@ async function submitTransaction(req, res) {
             "takerTokenAmount": new BigNumber("2"),
             "takerFee": new BigNumber("0"),
             "makerFee": new BigNumber("0"),
-            "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(), 
+            "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(),
             "feeRecipient": web3.eth.accounts[0],
-            "expirationUnixTimestampSec": new BigNumber(''+Math.floor(date/1000)+100000),
+            "expirationUnixTimestampSec": new BigNumber('' + Math.floor(date / 1000) + 100000),
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
         hash = ZeroEx.getOrderHashHex(form);
         console.log(hash);
         res.send(success);
-        console.log(success);    
+        console.log(success);
     } catch (error) {
         console.log(error);
-        res.send({error: error.toString()})
+        res.send({ error: error.toString() })
     }
-    res.send({"fd":"ds"})
+    res.send({ "fd": "ds" })
 }
 
 async function fillOrder(req, res) {
@@ -81,7 +74,7 @@ async function submitTransaction(req, res) {
     await zeroEx.setProviderAsync(provider);
     let date = new Date();
     try {
-        var zrxContract = await zeroEx.exchange.getContractAddressAsync(); 
+        var zrxContract = await zeroEx.exchange.getContractAddressAsync();
         let form = {
             "maker": web3.eth.accounts[0],
             "taker": web3.eth.accounts[1],
@@ -91,9 +84,9 @@ async function submitTransaction(req, res) {
             "takerTokenAmount": new BigNumber("2"),
             "takerFee": new BigNumber("0"),
             "makerFee": new BigNumber("0"),
-            "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(), 
+            "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(),
             "feeRecipient": web3.eth.accounts[0],
-            "expirationUnixTimestampSec": new BigNumber(''+Math.floor(date/1000)+100000),
+            "expirationUnixTimestampSec": new BigNumber('' + Math.floor(date / 1000) + 100000),
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
         hash = ZeroEx.getOrderHashHex(form);

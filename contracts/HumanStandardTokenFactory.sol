@@ -10,7 +10,7 @@ contract HumanStandardTokenFactory {
 
     function HumanStandardTokenFactory() {
       //upon creation of the factory, deploy a HumanStandardToken (parameters are meaningless) and store the bytecode provably.
-      address verifiedToken = createHumanStandardToken(10000, "Verify Token", 3, "VTX");
+      address verifiedToken = createHumanStandardToken(10000, "Verify Token", "VTX", 30);
       humanStandardByteCode = codeAt(verifiedToken);
     }
 
@@ -51,9 +51,9 @@ contract HumanStandardTokenFactory {
       }
     }
 
-    function createHumanStandardToken(uint256 _initialAmount, string _name, uint8 _decimals, string _symbol) returns (address) {
+    function createHumanStandardToken(uint256 _initialAmount, string _name, string _symbol, uint256 _expirationDays) returns (address) {
 
-        HumanStandardToken newToken = (new HumanStandardToken(_initialAmount, _name, _decimals, _symbol));
+        HumanStandardToken newToken = (new HumanStandardToken(_initialAmount, _name, _symbol, _expirationDays));
         created[msg.sender].push(address(newToken));
         isHumanToken[address(newToken)] = true;
         newToken.transfer(msg.sender, _initialAmount); //the factory will own the created tokens. You must transfer them.
