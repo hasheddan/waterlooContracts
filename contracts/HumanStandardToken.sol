@@ -32,7 +32,7 @@ contract HumanStandardToken is StandardToken {
 
     // Make sure contract has not expired
     modifier isAlive {
-        require ((Now() + expirationDays) > createDate);
+        require ((now + expirationDays) > createDate);
         _;
     }
 
@@ -46,8 +46,8 @@ contract HumanStandardToken is StandardToken {
         totalSupply = _initialAmount;                        // Update total supply
         name = _tokenName;                                   // Set the name for display purposes
         symbol = _tokenSymbol;                               // Set the symbol for display purposes
-        expirationDays = _expirationDays;
-        createDate = Now();
+        expirationDays = _expirationDays * 1 days;
+        createDate = now;
     }
 
     function transfer(address _to, uint256 _value) isAlive returns (bool success) {
