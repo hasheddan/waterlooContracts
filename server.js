@@ -122,7 +122,7 @@ async function createOrder(req, res) {
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
         hash = ZeroEx.getOrderHashHex(form);
-        let signedHash = await zeroEx.signOrderHashAsync(hash, req.body.address);
+        let signedHash = await zeroEx.signOrderHashAsync(hash, req.body.maker);
         form.ecSignature = signedHash;
         orders = orders || [];
         orders.push(form);
