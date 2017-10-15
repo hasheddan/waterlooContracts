@@ -8,7 +8,9 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var fs = require('fs');
+var cors = require(cors);
 
+app.use(cors());
 app.use(bodyParser());
 
 let addresses = [];
@@ -29,7 +31,6 @@ let tokenFactoryAddress = "0xb125995f5a4766c451cd8c34c4f5cac89b724571";
 let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at(tokenFactoryAddress);
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
-let etherTokenAddress = zeroEx.exchange.getContractAddressAsync();
 
 // Populate Orders on Server Start
 fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data) {
@@ -39,7 +40,7 @@ fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data
     orders = data;
 });
 
-setTimeout(function () {
+setTimeout(async function () {
     var contractCreateEvent = tokenFactory.ContractCreated({ _from: web3.eth.coinbase }, { fromBlock: 0, toBlock: 'latest' });
     contractCreateEvent.watch(async function (err, result) {
         if (!err) {
@@ -64,6 +65,19 @@ setTimeout(function () {
             return;
         }
     });
+    try {
+        let accounts = await zeroEx.getAvailableAddressesAsync();
+        // Give 10 ETHER TO CONTRACT ON INIT
+        for (var i = 0; i < accounts.length; i++) {
+            let balance = await zeroEx.token.getBalanceAsync(await zeroEx.etherToken.getContractAddressAsync(), accounts[i])
+            console.log(+balance.toString());
+            if(+balance.toString() < 1) {
+                await zeroEx.etherToken.depositAsync(new BigNumber(10 * 10 ** 18), accounts[i]);
+            }
+        }
+    } catch (e) {
+        console.log(e);
+    }
 }, 5000);
 
 
@@ -170,6 +184,7 @@ async function fillOrder(req, res) {
         console.log(e);
     }
     res.send(txHash);
+
 }
 
 async function exchange(req, res) {
