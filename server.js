@@ -14,18 +14,18 @@ app.use(bodyParser());
 let addresses = [];
 let orders = [];
 
-app.set("port", process.env.PORT || 8080);
+app.set("port", process.env.PORT || 8000);
 app.post('/create', createContract);
 app.get('/accounts', getAccounts)
 app.post('/createOrder', createOrder);
 app.get('/fillOrder', fillOrder);
 app.get('/exchange', exchange);
 app.get('/tokens', getTokens);
-app.get('/getBalance', getBalance);
+app.post('/getBalance', getBalance);
 
 let hash;
 
-let tokenFactoryAddress = "0xb34cde0ad3a83d04abebc0b66e75196f22216621";
+let tokenFactoryAddress = "0xb125995f5a4766c451cd8c34c4f5cac89b724571";
 let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at(tokenFactoryAddress);
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
@@ -34,42 +34,47 @@ let etherTokenAddress = zeroEx.exchange.getContractAddressAsync();
 // Populate Orders on Server Start
 fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data) {
     if (err) {
-        console.log("ORDER DATA NOT OBTAINED!!")
-        throw err;
+        console.log("ORDER DATA NOT OBTAINED!!");
     }
-    orders.push(JSON.parse(data));
-    console.log(JSON.parse(data));
+    orders = data;
 });
 
-setTimeout(function(){
-    var contractCreateEvent = tokenFactory.ContractCreated({_from:web3.eth.coinbase},{fromBlock: 0, toBlock: 'latest'});
-    contractCreateEvent.watch(async function(err, result) {
-      if (!err) {
-        let token = { 
-              owner: result.args.owner,
-              contractAddress: result.args.contractAddress,
-              name : result.args._name,
-              symbol: result.args._symbol,
-              dateCreated: result.args.dateCreated.toString() 
+setTimeout(function () {
+    var contractCreateEvent = tokenFactory.ContractCreated({ _from: web3.eth.coinbase }, { fromBlock: 0, toBlock: 'latest' });
+    contractCreateEvent.watch(async function (err, result) {
+        if (!err) {
+            let token = {
+                owner: result.args.owner,
+                contractAddress: result.args.contractAddress,
+                name: result.args._name,
+                symbol: result.args._symbol,
+                dateCreated: result.args.dateCreated.toString()
+            }
+            try {
+                // get the contracts balance then allow 0x to use the entirety of those tokens
+                let balance = await zeroEx.token.getBalanceAsync(result.args.contractAddress, result.args.owner)
+                let response = await zeroEx.token.setProxyAllowanceAsync(result.args.contractAddress, result.args.owner, balance);
+                addresses.push(token);
+                fs.writeFile(`./data/tokens/${tokenFactoryAddress}.json`, JSON.stringify(addresses), (err, res) => {
+                    console.log(err);
+                })
+            } catch (e) {
+                console.log(e);
+            }
+            return;
         }
-        try {
-            // get the contracts balance then allow 0x to use the entirety of those tokens
-            let balance = await zeroEx.token.getBalanceAsync(result.args.contractAddress, result.args.owner)
-            let response = await zeroEx.token.setProxyAllowanceAsync(result.args.contractAddress, result.args.owner, balance );
-            addresses.push(token);
-            fs.writeFile(`./data/tokens/${tokenFactoryAddress}.json`, JSON.stringify(addresses), (err , res) => {
-                console.log(err);
-            })
-        } catch (e) {
-            console.log(e);
-        }
-        return;
-      }
     });
-},5000);
+}, 5000);
 
 
 async function getTokens(req, res) {
+    addresses = addresses.reverse();
+    addresses.push({
+        contractAddress: await zeroEx.etherToken.getContractAddressAsync(),
+        name: "Ether",
+        symbol: "ETH"
+    })
+    addresses = addresses.reverse();
     res.send(addresses);
 };
 
@@ -85,8 +90,8 @@ async function getAccounts(req, res) {
 
 
 async function createContract(req, res) {
-    tokenFactory.createHumanStandardToken(req.body.initialAmount, req.body.name, req.body.symbol, req.body.expirationDate, {from: req.account || web3.eth.accounts[0], gas: 819686}, (err, resp) => {
-        res.send({tx: resp});
+    tokenFactory.createHumanStandardToken(req.body.initialAmount, req.body.name, req.body.symbol, req.body.expirationDate, { from: req.account || web3.eth.accounts[0], gas: 819686 }, (err, resp) => {
+        res.send({ tx: resp });
     });
 };
 
@@ -97,8 +102,8 @@ async function createOrder(req, res) {
         var zrxContract = await zeroEx.exchange.getContractAddressAsync();
         let form = {
             "maker": req.body.maker,
-            "taker": req.body.taker,
-            "takerTokenAddress": req.body.takerTokenAddress,
+            "taker": "0x0000000000000000000000000000000000000000",
+            "takerTokenAddress": zrxContract,
             "makerTokenAddress": req.body.makerTokenAddress,
             "makerTokenAmount": new BigNumber(req.body.makerTokenAmount),
             "takerTokenAmount": new BigNumber(req.body.makerTokenAmount),
@@ -122,25 +127,33 @@ async function createOrder(req, res) {
 }
 
 async function getBalance(req, res) {
-    // TODO: Need to parse by address passed
+    let address = req.body.address;
     var stuff = [];
-    fs.readdir('./data/tokens/', function(err, filenames) {
+    fs.readFile(`./data/tokens/${tokenFactoryAddress}.json`, async function (err, resp) {
         if (err) {
-          onError(err);
-          return;
+            res.send(resp);
         }
-        filenames.forEach(function(filename) {
-          fs.readFile('./data/tokens/' + filename, 'utf-8', function(err, content) {
-            if (err) {
-              onError(err);
-              return;
+        resp = JSON.parse(resp);
+
+        // ADD ETHER TOKEN
+        try {
+            resp = resp.reverse();
+            resp.push({
+                contractAddress: await zeroEx.etherToken.getContractAddressAsync(),
+                name: "Ether",
+                symbol: "ETH"
+            })
+            resp = resp.reverse();
+
+            for (var i = 0; i < resp.length; i++) {
+                console.log(await zeroEx.token.getBalanceAsync(resp[i].contractAddress, address));
+                resp[i].balance = await zeroEx.token.getBalanceAsync(resp[i].contractAddress, address);
             }
-            stuff.push(JSON.parse(content));
-            console.log(stuff);
-          });
-        });
+        } catch (e) {
+            console.log(e);
+        }
+        res.send(resp);
     });
-    res.send(stuff);
 }
 
 
@@ -152,8 +165,8 @@ async function fillOrder(req, res) {
     let txHash = {};
     try {
         txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, web3.eth.accounts[0])
-        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, web3.eth.accounts[1]);  
-    } catch(e) {
+        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, web3.eth.accounts[1]);
+    } catch (e) {
         console.log(e);
     }
     res.send(txHash);
