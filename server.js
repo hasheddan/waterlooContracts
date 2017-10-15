@@ -172,9 +172,9 @@ async function fillOrder(req, res) {
     let txHash = {};
     try {
         delete req.body.number;
-        delete req.bodt.address;
-        txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, req.body.address)
-        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, req.body.address);
+        delete req.body.address;
+        txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, address)
+        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, address);
     } catch (e) {
         console.log(e);
     }
