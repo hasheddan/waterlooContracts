@@ -166,13 +166,11 @@ async function getBalance(req, res) {
 
 
 async function fillOrder(req, res) {
-    let form = req.body;
+    let form = req.body.form;
     let number = new BigNumber(req.body.number);
     let address = req.body.address;
     let txHash = {};
     try {
-        delete req.body.number;
-        delete req.body.address;
         txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, address)
         txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, address);
     } catch (e) {
