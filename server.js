@@ -27,7 +27,7 @@ app.post('/getBalance', getBalance);
 
 let hash;
 
-let tokenFactoryAddress = "0x048781984327f6b5006057ed4ef9605e14b9d34e";
+let tokenFactoryAddress = "0xda705a76b79ef1d8c87bebde20e93bd7479cbe1a";
 let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at(tokenFactoryAddress);
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
@@ -57,7 +57,7 @@ setTimeout(async function () {
             try {
                 // get the contracts balance then allow 0x to use the entirety of those tokens
                 let balance = await zeroEx.token.getBalanceAsync(result.args.contractAddress, result.args.owner)
-                let response = await zeroEx.token.setProxyAllowanceAsync(result.args.contractAddress, result.args.owner, balance);
+                let response = await zeroEx.token.setUnlimitedProxyAllowanceAsync(result.args.contractAddress, result.args.owner);
                 addresses.push(token);
                 fs.writeFile(`./data/tokens/${tokenFactoryAddress}.json`, JSON.stringify(addresses), (err, res) => {
                     console.log(err);
@@ -126,7 +126,7 @@ async function createOrder(req, res) {
             "makerFee": new BigNumber(0),
             "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(),
             "feeRecipient": req.body.maker,
-            "expirationUnixTimestampSec": new BigNumber('' + Math.floor(date / 1000) + 100000),
+            "expirationUnixTimestampSec": new BigNumber(Date.now() + 10000000),
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
         hash = ZeroEx.getOrderHashHex(form);
@@ -189,7 +189,7 @@ async function fillOrder(req, res) {
     try {
         // txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, address);
         try {
-            // let response = await zeroEx.token.setProxyAllowanceAsync(form.takerTokenAddress, address, number);    
+            let response = await zeroEx.token.setUnlimitedProxyAllowanceAsync(form.takerTokenAddress, address);    
         } catch (e) {
             console.log(e);
         }
