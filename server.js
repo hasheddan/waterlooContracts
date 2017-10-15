@@ -27,18 +27,17 @@ app.post('/getBalance', getBalance);
 
 let hash;
 
-let tokenFactoryAddress = "0xb125995f5a4766c451cd8c34c4f5cac89b724571";
+let tokenFactoryAddress = "0x04b5dadd2c0d6a261bfafbc964e0cac48585def3";
 let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at(tokenFactoryAddress);
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
-
+let transferTokenProxy = web3.eth.contract(require('./data/TokenTransferProxy.json').abi);
 try {
     // Populate Orders on Server Start
     fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data) {
-        if (err) {
-            console.log("ORDER DATA NOT OBTAINED!!");
+        if (!err) {
+            orders = JSON.parse(data || []);
         }
-        orders = JSON.parse(data);
     });
 } catch (e) {
 
@@ -63,6 +62,11 @@ setTimeout(async function () {
                 fs.writeFile(`./data/tokens/${tokenFactoryAddress}.json`, JSON.stringify(addresses), (err, res) => {
                     console.log(err);
                 })
+                let transferTokenProxyAddress = await zeroEx.proxy.getContractAddressAsync();
+                transferTokenProxy.at(transferTokenProxyAddress).addAuthorizedAddress(result.args.contractAddress, {from: web3.eth.accounts[0]}, (err, res) => {
+                    console.log(res);
+                });
+
             } catch (e) {
                 console.log(e);
             }
@@ -176,8 +180,14 @@ async function fillOrder(req, res) {
     let txHash = {};
     try {
         // txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, address);
+        console.log(form.takerTokenAddress);
         console.log(address);
-        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, address);
+        try {
+            let response = await zeroEx.token.setProxyAllowanceAsync(form.takerTokenAddress, address, number);    
+        } catch (e) {
+
+        }
+        txHash = await zeroEx.exchange.fillOrderAsync(form, number, false, address);
     } catch (e) {
         console.log(e);
     }
