@@ -32,13 +32,17 @@ let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTok
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
 
-// Populate Orders on Server Start
-fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data) {
-    if (err) {
-        console.log("ORDER DATA NOT OBTAINED!!");
-    }
-    orders = JSON.parse(data || {});
-});
+try {
+    // Populate Orders on Server Start
+    fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data) {
+        if (err) {
+            console.log("ORDER DATA NOT OBTAINED!!");
+        }
+        orders = JSON.parse(data);
+    });
+} catch (e) {
+
+}
 
 setTimeout(async function () {
     var contractCreateEvent = tokenFactory.ContractCreated({ _from: web3.eth.coinbase }, { fromBlock: 0, toBlock: 'latest' });
@@ -71,7 +75,7 @@ setTimeout(async function () {
         for (var i = 0; i < accounts.length; i++) {
             let balance = await zeroEx.token.getBalanceAsync(await zeroEx.etherToken.getContractAddressAsync(), accounts[i])
             console.log(+balance.toString());
-            if(+balance.toString() < 1) {
+            if (+balance.toString() < 1) {
                 await zeroEx.etherToken.depositAsync(new BigNumber(10 * 10 ** 18), accounts[i]);
             }
         }
@@ -131,7 +135,7 @@ async function createOrder(req, res) {
         console.log(error);
         res.send({ error: error.toString() })
     }
-    res.send({hash});
+    res.send({ hash });
 }
 
 async function getBalance(req, res) {
@@ -177,7 +181,7 @@ async function fillOrder(req, res) {
     } catch (e) {
         console.log(e);
     }
-    res.send({txHash: "0x3ac32372a3d7190dacc829a0197bccae3225"});
+    res.send({ txHash: "0x3ac32372a3d7190dacc829a0197bccae3225" });
 
 }
 
