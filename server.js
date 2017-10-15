@@ -124,6 +124,7 @@ async function createOrder(req, res) {
         hash = ZeroEx.getOrderHashHex(form);
         let signedHash = await zeroEx.signOrderHashAsync(hash, web3.eth.accounts[0]);
         form.ecSignature = signedHash;
+        orders = orders || [];
         orders.push(form);
         fs.writeFile(`./data/orders/${tokenFactoryAddress}.json`, JSON.stringify(orders));
     } catch (error) {
@@ -181,7 +182,7 @@ async function fillOrder(req, res) {
 }
 
 async function exchange(req, res) {
-    res.send(orders);
+    res.send(orders || []);
 }
 
 async function init() {
