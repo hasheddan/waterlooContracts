@@ -131,7 +131,7 @@ async function createOrder(req, res) {
         console.log(error);
         res.send({ error: error.toString() })
     }
-    res.send(hash);
+    res.send({hash});
 }
 
 async function getBalance(req, res) {
