@@ -22,4 +22,16 @@ Install dependencies:
 
 *__Note__: server default port is 8000*
 
-## API --> TODO
+## API
+
+#### POST: ```/create```
+*initialAmount*: (integer) amount of tokens to be issued
+*name*: (string) token name
+*symbol*: (string) 3 or 4 letter token symbol
+*expirationDate*: (integer) number of days that tokens are valid for
+
+#### GET: ```/accounts```
+
+#### POST: ```/createOrder```
+*maker*: (address) address of order maker
+*makerTokenAddress*: (address) address of token order maker 

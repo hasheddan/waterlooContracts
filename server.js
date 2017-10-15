@@ -8,7 +8,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var fs = require('fs');
-var cors = require(cors);
+var cors = require('cors');
 
 app.use(cors());
 app.use(bodyParser());
@@ -120,7 +120,7 @@ async function createOrder(req, res) {
             "takerTokenAddress": zrxContract,
             "makerTokenAddress": req.body.makerTokenAddress,
             "makerTokenAmount": new BigNumber(req.body.makerTokenAmount),
-            "takerTokenAmount": new BigNumber(req.body.makerTokenAmount),
+            "takerTokenAmount": new BigNumber(req.body.takerTokenAmount),
             "takerFee": new BigNumber(0),
             "makerFee": new BigNumber(0),
             "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(),
