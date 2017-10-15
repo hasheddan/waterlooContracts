@@ -97,7 +97,7 @@ async function getAccounts(req, res) {
 
 
 async function createContract(req, res) {
-    tokenFactory.createHumanStandardToken(req.body.initialAmount, req.body.name, req.body.symbol, req.body.expirationDate, { from: req.account || web3.eth.accounts[0], gas: 819686 }, (err, resp) => {
+    tokenFactory.createHumanStandardToken(req.body.initialAmount, req.body.name, req.body.symbol, req.body.expirationDate, { from: req.account || req.body.address, gas: 819686 }, (err, resp) => {
         res.send({ tx: resp });
     });
 };
@@ -117,12 +117,12 @@ async function createOrder(req, res) {
             "takerFee": new BigNumber(0),
             "makerFee": new BigNumber(0),
             "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(),
-            "feeRecipient": web3.eth.accounts[0],
+            "feeRecipient": req.body.address,
             "expirationUnixTimestampSec": new BigNumber('' + Math.floor(date / 1000) + 100000),
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
         hash = ZeroEx.getOrderHashHex(form);
-        let signedHash = await zeroEx.signOrderHashAsync(hash, web3.eth.accounts[0]);
+        let signedHash = await zeroEx.signOrderHashAsync(hash, req.body.address);
         form.ecSignature = signedHash;
         orders = orders || [];
         orders.push(form);
@@ -167,12 +167,12 @@ async function getBalance(req, res) {
 
 async function fillOrder(req, res) {
     let form = req.body.form;
-    let success = await zeroEx.signOrderHashAsync(req.hash, web3.eth.accounts[0])
+    let success = await zeroEx.signOrderHashAsync(req.hash, req.body.address)
     form.ecSignature = success;
     let number = new BigNumber(req.body.number);
     let txHash = {};
     try {
-        txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, web3.eth.accounts[0])
+        txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, req.body.address)
         txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, web3.eth.accounts[1]);
     } catch (e) {
         console.log(e);
