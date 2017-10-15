@@ -61,6 +61,8 @@ __Example__:
 
 #### GET: ```/fillOrder```: executes order and returns transaction hash
 - *form*: (JSON object) JSON object obtained from order in the exchange
+- *address*: (address) address of user who's token balances we desire to know
+- *number*: (integer) number of tokens the taker will buy
 
 #### GET: ```/exchange```: returns all outstanding orders
 
