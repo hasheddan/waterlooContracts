@@ -37,7 +37,7 @@ fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data
     if (err) {
         console.log("ORDER DATA NOT OBTAINED!!");
     }
-    orders = data;
+    orders = JSON.parse(data);
 });
 
 setTimeout(async function () {
@@ -166,10 +166,11 @@ async function getBalance(req, res) {
 
 
 async function fillOrder(req, res) {
-    let form = req.body.form;
+    let form = req.body;
     let number = new BigNumber(req.body.number);
     let txHash = {};
     try {
+        delete req
         txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, req.body.address)
         txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, req.body.address);
     } catch (e) {
