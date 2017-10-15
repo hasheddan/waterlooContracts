@@ -117,8 +117,8 @@ async function createOrder(req, res) {
         var zrxContract = await zeroEx.exchange.getContractAddressAsync();
         let form = {
             "maker": req.body.maker,
-            "taker": "0x0000000000000000000000000000000000000000",
-            "takerTokenAddress": zrxContract,
+            "taker": req.body.taker,
+            "takerTokenAddress": req.body.takerTokenAddress,
             "makerTokenAddress": req.body.makerTokenAddress,
             "makerTokenAmount": new BigNumber(req.body.makerTokenAmount),
             "takerTokenAmount": new BigNumber(req.body.takerTokenAmount),
@@ -175,23 +175,30 @@ async function getBalance(req, res) {
 
 async function fillOrder(req, res) {
     let form = req.body.form;
+    console.log(form);
+    form.makerfee = new BigNumber(form.makerfee || 0);
+    form.takerfee = new BigNumber(form.takerfee || 0);
+    form.makerTokenAmount = new BigNumber(form.makerTokenAmount),
+    form.takerTokenAmount =  new BigNumber(form.takerTokenAmount),
+    form.expirationUnixTimestampSec = new BigNumber(form.expirationUnixTimestampSec || 0);
     let number = new BigNumber(req.body.number);
     let address = req.body.address;
     let txHash = {};
+    let makerAllowance = await zeroEx.token.getProxyAllowanceAsync(form.makerTokenAddress, form.maker)
+    let tkerAllowance = await zeroEx.token.getProxyAllowanceAsync(form.takerTokenAddress, form.taker);
     try {
         // txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, address);
-        console.log(form.takerTokenAddress);
-        console.log(address);
         try {
-            let response = await zeroEx.token.setProxyAllowanceAsync(form.takerTokenAddress, address, number);    
+            // let response = await zeroEx.token.setProxyAllowanceAsync(form.takerTokenAddress, address, number);    
         } catch (e) {
-
+            console.log(e);
         }
+        console.log(address);
         txHash = await zeroEx.exchange.fillOrderAsync(form, number, false, address);
     } catch (e) {
         console.log(e);
     }
-    res.send({ txHash: "0x3ac32372a3d7190dacc829a0197bccae3225" });
+    res.send({ txHash  });
 
 }
 
