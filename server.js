@@ -27,7 +27,7 @@ app.post('/getBalance', getBalance);
 
 let hash;
 
-let tokenFactoryAddress = "0x04b5dadd2c0d6a261bfafbc964e0cac48585def3";
+let tokenFactoryAddress = "0x048781984327f6b5006057ed4ef9605e14b9d34e";
 let tokenFactory = web3.eth.contract(require('./build/contracts/HumanStandardTokenFactory.json').abi).at(tokenFactoryAddress);
 
 let token = web3.eth.contract(require('./build/contracts/HumanStandardToken.json')).abi;
@@ -117,7 +117,7 @@ async function createOrder(req, res) {
         var zrxContract = await zeroEx.exchange.getContractAddressAsync();
         let form = {
             "maker": req.body.maker,
-            "taker": req.body.taker,
+            "taker": "0x0000000000000000000000000000000000000000",
             "takerTokenAddress": req.body.takerTokenAddress,
             "makerTokenAddress": req.body.makerTokenAddress,
             "makerTokenAmount": new BigNumber(req.body.makerTokenAmount),
