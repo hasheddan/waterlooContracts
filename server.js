@@ -37,7 +37,7 @@ fs.readFile(`./data/orders/${tokenFactoryAddress}.json`, function read(err, data
     if (err) {
         console.log("ORDER DATA NOT OBTAINED!!");
     }
-    orders = JSON.parse(data);
+    orders = JSON.parse(data || {});
 });
 
 setTimeout(async function () {
