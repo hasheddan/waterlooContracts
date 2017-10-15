@@ -82,13 +82,6 @@ setTimeout(async function () {
 
 
 async function getTokens(req, res) {
-    addresses = addresses.reverse();
-    addresses.push({
-        contractAddress: await zeroEx.etherToken.getContractAddressAsync(),
-        name: "Ether",
-        symbol: "ETH"
-    })
-    addresses = addresses.reverse();
     res.send(addresses);
 };
 
@@ -191,6 +184,18 @@ async function exchange(req, res) {
     res.send(orders);
 }
 
+async function init() {
+    addresses = addresses.reverse();
+    addresses.push({
+        contractAddress: await zeroEx.etherToken.getContractAddressAsync(),
+        name: "Ether",
+        symbol: "ETH"
+    })
+    addresses = addresses.reverse();
+}
+
 app.listen(app.get("port"), function () {
     console.log('Server running on http://localhost:' + app.get("port"))
 })
+
+init()
