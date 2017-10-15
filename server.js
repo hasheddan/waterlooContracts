@@ -117,7 +117,7 @@ async function createOrder(req, res) {
             "takerFee": new BigNumber(0),
             "makerFee": new BigNumber(0),
             "exchangeContractAddress": await zeroEx.exchange.getContractAddressAsync(),
-            "feeRecipient": req.body.address,
+            "feeRecipient": req.body.maker,
             "expirationUnixTimestampSec": new BigNumber('' + Math.floor(date / 1000) + 100000),
             "salt": ZeroEx.generatePseudoRandomSalt()
         }
