@@ -20,7 +20,7 @@ app.set("port", process.env.PORT || 8000);
 app.post('/create', createContract);
 app.get('/accounts', getAccounts)
 app.post('/createOrder', createOrder);
-app.get('/fillOrder', fillOrder);
+app.post('/fillOrder', fillOrder);
 app.get('/exchange', exchange);
 app.get('/tokens', getTokens);
 app.post('/getBalance', getBalance);
@@ -167,13 +167,11 @@ async function getBalance(req, res) {
 
 async function fillOrder(req, res) {
     let form = req.body.form;
-    let success = await zeroEx.signOrderHashAsync(req.hash, req.body.address)
-    form.ecSignature = success;
     let number = new BigNumber(req.body.number);
     let txHash = {};
     try {
         txHash = await zeroEx.exchange.validateFillOrderThrowIfInvalidAsync(form, number, req.body.address)
-        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, web3.eth.accounts[1]);
+        txHash = await zeroEx.exchange.fillOrderAsync(form, number, true, req.body.address);
     } catch (e) {
         console.log(e);
     }
